@@ -1,0 +1,16 @@
+# Compiled class files
+bin/*.class
+bin/**/*.class
+
+# Config con credenciales — NO subir
+bin/config.properties
+
+# IDE y OS
+*.iml
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# JAR del conector (pesado — se descarga aparte)
+lib/mysql-connector-j-*.jar
