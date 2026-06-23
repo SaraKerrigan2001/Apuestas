@@ -11,10 +11,21 @@ public interface UsuarioDAO {
     boolean registrar(String nombreCompleto, String email, String password);
 
     /**
-     * Verifica credenciales de login.
+     * Registra un nuevo usuario con rol de administrador o normal.
+     */
+    boolean registrar(String nombreCompleto, String email, String password, boolean esAdmin);
+
+    /**
+     * Verifica credenciales de login normal.
      * @return nombre completo del usuario si es válido, null si falla
      */
     String login(String email, String password);
+
+    /**
+     * Verifica credenciales de login de Administrador.
+     * @return nombre completo del admin si es válido y tiene permisos, null si falla
+     */
+    String loginAdmin(String email, String password);
 
     /**
      * Verifica si un email ya está registrado.

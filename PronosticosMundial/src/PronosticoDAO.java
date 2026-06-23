@@ -10,64 +10,17 @@ import java.util.Properties;
 
 public class PronosticoDAO {
 
-    private final String url;
-    private final String user;
-    private final String pass;
-
     // ---------------------------------------------------------------
-    // Constructor: lee credenciales desde config.properties
-    // Estrategia robusta: usa la ubicación del .class para encontrar
-    // el archivo sin depender del directorio de trabajo actual.
+    // Constructor
     // ---------------------------------------------------------------
     public PronosticoDAO() {
-        Properties props = new Properties();
-
-        // Obtener la carpeta bin/ donde están los .class
-        String binPath = "";
-        try {
-            binPath = new java.io.File(
-                PronosticoDAO.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()
-            ).getAbsolutePath();
-        } catch (Exception ignored) {}
-
-        // Rutas candidatas en orden de prioridad
-        java.util.List<java.io.File> candidatos = new java.util.ArrayList<>();
-        if (!binPath.isEmpty()) {
-            java.io.File binDir = new java.io.File(binPath);
-            candidatos.add(new java.io.File(binDir, "config.properties"));           // bin/config.properties
-            candidatos.add(new java.io.File(binDir.getParent(), "config.properties")); // raíz del proyecto
-        }
-        candidatos.add(new java.io.File("config.properties"));                        // directorio actual
-        candidatos.add(new java.io.File("C:/java/PronosticosMundial/config.properties")); // ruta absoluta fija
-
-        boolean cargado = false;
-        for (java.io.File f : candidatos) {
-            if (f.exists()) {
-                try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) {
-                    props.load(fis);
-                    cargado = true;
-                    System.out.println("[DAO] Config cargado desde: " + f.getAbsolutePath());
-                    break;
-                } catch (IOException ignored) {}
-            }
-        }
-
-        if (!cargado) {
-            System.err.println("[DAO] config.properties no encontrado. Usando valores por defecto.");
-        }
-
-        this.url  = props.getProperty("db.url",
-                "jdbc:mysql://localhost:3306/mundial_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
-        this.user = props.getProperty("db.user", "root");
-        this.pass = props.getProperty("db.pass", "");
     }
 
     // ---------------------------------------------------------------
     // Helper: abre una conexión
     // ---------------------------------------------------------------
     private Connection getConexion() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+        return ConexionDB.getInstancia().getConexion();
     }
 
     // ---------------------------------------------------------------

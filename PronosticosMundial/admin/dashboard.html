@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Velocity Admin | BetCentral Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block; line-height: 1; text-transform: none;
+            letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #101319; }
+        ::-webkit-scrollbar-thumb { background: #32353b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #444933; }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(195, 244, 0, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(195, 244, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(195, 244, 0, 0); }
+        }
+        .live-dot { animation: pulse-green 2s infinite; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.4s ease-out forwards; }
+
+        @keyframes countUp { from { opacity: 0.3; } to { opacity: 1; } }
+        .count-flash { animation: countUp 0.3s ease-out; }
+
+        .loading-skeleton {
+            background: linear-gradient(90deg, #1d2026 25%, #272a31 50%, #1d2026 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#101319",
+                        "surface-container-highest": "#32353b",
+                        "on-surface": "#e1e2eb",
+                        "surface-container": "#1d2026",
+                        "primary-container": "#c3f400",
+                        "surface-container-high": "#272a31",
+                        "surface-tint": "#abd600",
+                        "on-tertiary-fixed": "#181c24",
+                        "on-error": "#690005",
+                        "on-background": "#e1e2eb",
+                        "inverse-surface": "#e1e2eb",
+                        "outline": "#8e9379",
+                        "secondary-fixed-dim": "#00daf8",
+                        "on-secondary-fixed": "#001f25",
+                        "outline-variant": "#444933",
+                        "on-secondary-container": "#005f6d",
+                        "on-primary-fixed": "#161e00",
+                        "surface-container-low": "#191c22",
+                        "primary": "#ffffff",
+                        "surface-dim": "#101319",
+                        "secondary": "#b9f1ff",
+                        "tertiary-container": "#dfe2ed",
+                        "surface-bright": "#363940",
+                        "on-primary-container": "#556d00",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#506600",
+                        "on-tertiary-container": "#61646e",
+                        "on-surface-variant": "#c4c9ac",
+                        "surface-variant": "#32353b",
+                        "surface-container-lowest": "#0b0e14",
+                        "secondary-fixed": "#a5eeff",
+                        "on-tertiary": "#2c3039",
+                        "inverse-on-surface": "#2d3037",
+                        "primary-fixed": "#c3f400",
+                        "on-secondary": "#00363f",
+                        "primary-fixed-dim": "#abd600",
+                        "on-primary": "#283500",
+                        "error": "#ffb4ab",
+                        "background": "#101319",
+                        "tertiary-fixed-dim": "#c3c6d1",
+                        "secondary-container": "#00e0ff",
+                        "tertiary-fixed": "#dfe2ed",
+                        "tertiary": "#ffffff"
+                    },
+                    borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" },
+                    spacing: {
+                        "margin-mobile": "16px", md: "16px", sm: "8px", lg: "24px",
+                        "margin-desktop": "32px", xs: "4px", gutter: "12px", base: "4px", xl: "40px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["Inter"], "headline-lg": ["Inter"],
+                        "mono-data": ["JetBrains Mono"], "body-sm": ["Inter"],
+                        "title-md": ["Inter"], "label-caps": ["Inter"], "display-lg": ["Inter"]
+                    },
+                    fontSize: {
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "700" }],
+                        "mono-data": ["14px", { lineHeight: "16px", fontWeight: "500" }],
+                        "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "title-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "700" }],
+                        "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "800" }]
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-lg">
+
+<!-- ═══════════════════════════ TOP NAV ═══════════════════════════ -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-surface-dim border-b border-white/10 flex justify-between items-center px-margin-desktop h-20 w-full">
+    <div class="flex items-center gap-md">
+        <span class="material-symbols-outlined text-primary-fixed">grid_view</span>
+        <h1 class="font-display-lg text-[24px] font-black text-primary-fixed tracking-tight">VELOCITY ADMIN</h1>
+    </div>
+    <div class="flex items-center gap-lg">
+        <div class="hidden md:flex items-center gap-sm bg-surface-container-high px-md py-xs rounded-lg border border-white/5">
+            <div class="w-2 h-2 rounded-full bg-primary-fixed live-dot" id="statusDot"></div>
+            <span class="font-mono-data text-primary-fixed text-xs tracking-widest" id="statusLabel">SYSTEM: CONNECTING...</span>
+        </div>
+        <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed transition-colors">notifications</span>
+            <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary-fixed transition-colors">search</span>
+            <div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-sm">AD</div>
+        </div>
+    </div>
+</header>
+
+<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+<aside class="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-surface-container border-r border-white/10 flex flex-col gap-sm p-md z-40">
+    <div class="flex flex-col gap-xs mb-lg px-xs">
+        <span class="font-label-caps text-on-surface-variant text-[10px] tracking-widest uppercase">Management</span>
+        <nav class="flex flex-col gap-xs">
+            <a class="flex items-center gap-md p-sm bg-primary-fixed text-on-primary-fixed font-bold rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-caps text-label-caps">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-md p-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">group</span>
+                <span class="font-label-caps text-label-caps">Usuarios</span>
+            </a>
+            <a class="flex items-center gap-md p-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">payments</span>
+                <span class="font-label-caps text-label-caps">Mercados</span>
+            </a>
+            <a class="flex items-center gap-md p-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">sports_soccer</span>
+                <span class="font-label-caps text-label-caps">Partidos</span>
+            </a>
+        </nav>
+    </div>
+    <div class="flex flex-col gap-xs px-xs">
+        <span class="font-label-caps text-on-surface-variant text-[10px] tracking-widest uppercase">Operaciones</span>
+        <nav class="flex flex-col gap-xs">
+            <a class="flex items-center gap-md p-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">security</span>
+                <span class="font-label-caps text-label-caps">Riesgo</span>
+            </a>
+            <a class="flex items-center gap-md p-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-lg transition-all duration-150" href="#">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-label-caps text-label-caps">Configuración</span>
+            </a>
+        </nav>
+    </div>
+    <div class="mt-auto p-md bg-surface-container-low rounded-xl border border-white/5 flex flex-col gap-xs">
+        <div class="flex items-center justify-between">
+            <span class="font-mono-data text-[10px] text-on-surface-variant uppercase">v4.2.0-stable</span>
+            <span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+        </div>
+        <div class="text-[11px] text-on-surface-variant leading-tight">
+            Latencia MySQL: <span class="text-primary-fixed" id="latencyVal">--ms</span>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
+<main class="ml-64 mt-20 p-margin-desktop min-h-[calc(100vh-80px)]">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-md">
+        <div>
+            <h2 class="font-headline-lg text-headline-lg text-primary">Panel de Control</h2>
+            <p class="text-on-surface-variant font-body-sm">Datos en tiempo real de la base de datos del Mundial 2026.</p>
+        </div>
+        <div class="flex gap-sm">
+            <button onclick="exportData()" class="px-md py-sm bg-surface-container-high border border-white/10 rounded text-on-surface font-label-caps flex items-center gap-sm hover:bg-surface-container-highest transition-colors">
+                <span class="material-symbols-outlined text-sm">download</span> EXPORTAR
+            </button>
+            <button onclick="fetchStats()" class="px-md py-sm bg-primary-fixed text-on-primary-fixed border border-primary-fixed rounded font-label-caps flex items-center gap-sm hover:brightness-110 transition-all active:scale-95">
+                <span class="material-symbols-outlined text-sm">refresh</span> ACTUALIZAR
+            </button>
+        </div>
+    </div>
+
+    <!-- ── KPI Cards ── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg mb-xl" id="kpiGrid">
+        <!-- Card: Usuarios -->
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col gap-md relative overflow-hidden group animate-in" style="animation-delay:0.05s">
+            <div class="flex justify-between items-start z-10">
+                <span class="font-label-caps text-on-surface-variant tracking-wider uppercase">Usuarios</span>
+                <span class="material-symbols-outlined text-secondary-fixed-dim">group</span>
+            </div>
+            <div class="z-10">
+                <span class="font-mono-data text-[32px] font-bold text-primary" id="kpiUsuarios">--</span>
+                <div class="flex items-center gap-xs text-on-surface-variant mt-xs">
+                    <span class="material-symbols-outlined text-sm">person</span>
+                    <span class="text-xs">Registrados en el sistema</span>
+                </div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-[80px]">group</span>
+            </div>
+        </div>
+
+        <!-- Card: Equipos -->
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col gap-md relative overflow-hidden group animate-in" style="animation-delay:0.1s">
+            <div class="flex justify-between items-start z-10">
+                <span class="font-label-caps text-on-surface-variant tracking-wider uppercase">Equipos</span>
+                <span class="material-symbols-outlined text-primary-fixed">flag</span>
+            </div>
+            <div class="z-10">
+                <span class="font-mono-data text-[32px] font-bold text-primary" id="kpiEquipos">--</span>
+                <div class="flex items-center gap-xs text-primary-fixed mt-xs">
+                    <span class="material-symbols-outlined text-sm">sports_soccer</span>
+                    <span class="text-xs font-bold">Mundial 2026</span>
+                </div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-[80px]">flag</span>
+            </div>
+        </div>
+
+        <!-- Card: Partidos -->
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col gap-md relative overflow-hidden group animate-in" style="animation-delay:0.15s">
+            <div class="flex justify-between items-start z-10">
+                <span class="font-label-caps text-on-surface-variant tracking-wider uppercase">Partidos</span>
+                <span class="material-symbols-outlined text-primary-fixed-dim">stadium</span>
+            </div>
+            <div class="z-10">
+                <span class="font-mono-data text-[32px] font-bold text-primary" id="kpiPartidos">--</span>
+                <div class="flex items-center gap-xs text-on-surface-variant mt-xs">
+                    <span class="material-symbols-outlined text-sm">calendar_month</span>
+                    <span class="text-xs">Fixture completo</span>
+                </div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-[80px]">stadium</span>
+            </div>
+        </div>
+
+        <!-- Card: Pronósticos -->
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col gap-md relative overflow-hidden group animate-in" style="animation-delay:0.2s">
+            <div class="flex justify-between items-start z-10">
+                <span class="font-label-caps text-on-surface-variant tracking-wider uppercase">Pronósticos</span>
+                <span class="material-symbols-outlined text-secondary-container">analytics</span>
+            </div>
+            <div class="z-10">
+                <span class="font-mono-data text-[32px] font-bold text-primary" id="kpiPronosticos">--</span>
+                <div class="flex items-center gap-xs mt-xs">
+                    <span class="text-xs text-primary-fixed font-bold" id="kpiAciertos">-- aciertos</span>
+                    <span class="text-xs text-on-surface-variant">·</span>
+                    <span class="text-xs text-error" id="kpiFallos">-- fallos</span>
+                    <span class="text-xs text-on-surface-variant">·</span>
+                    <span class="text-xs text-secondary-container" id="kpiPendientesP">-- pend.</span>
+                </div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-[80px]">analytics</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Charts Row ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg mb-xl">
+
+        <!-- Partidos por Grupo (2/3) -->
+        <div class="lg:col-span-2 bg-surface-container border border-white/10 p-lg flex flex-col gap-lg min-h-[400px] animate-in" style="animation-delay:0.25s">
+            <div class="flex justify-between items-center">
+                <div class="flex flex-col">
+                    <h3 class="font-title-md text-title-md text-primary">Partidos por Grupo</h3>
+                    <p class="text-on-surface-variant text-xs">Distribución del fixture del Mundial 2026</p>
+                </div>
+                <div class="flex gap-xs">
+                    <span class="px-sm py-xs bg-primary-fixed text-on-primary-fixed text-[10px] font-bold rounded">GRUPOS</span>
+                </div>
+            </div>
+            <div class="flex-grow flex items-end gap-2 py-md relative" id="chartGroups">
+                <!-- Bars injected by JS -->
+                <div class="w-full h-48 flex items-end gap-1.5" id="chartBars">
+                    <div class="loading-skeleton w-full h-32 rounded-t-sm"></div>
+                    <div class="loading-skeleton w-full h-24 rounded-t-sm"></div>
+                    <div class="loading-skeleton w-full h-28 rounded-t-sm"></div>
+                    <div class="loading-skeleton w-full h-20 rounded-t-sm"></div>
+                </div>
+            </div>
+            <div class="flex justify-between font-mono-data text-[10px] text-on-surface-variant" id="chartLabels"></div>
+        </div>
+
+        <!-- Top Mercados (1/3) -->
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col gap-md animate-in" style="animation-delay:0.3s">
+            <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-primary-fixed">trending_up</span>
+                <h3 class="font-title-md text-title-md text-primary">Top Mercados</h3>
+            </div>
+            <div class="flex flex-col gap-sm" id="topMarketsList">
+                <div class="loading-skeleton h-16 rounded"></div>
+                <div class="loading-skeleton h-16 rounded"></div>
+                <div class="loading-skeleton h-16 rounded"></div>
+            </div>
+            <div class="mt-auto pt-md border-t border-white/5 flex flex-col gap-sm">
+                <div class="flex justify-between text-xs">
+                    <span class="text-on-surface-variant">Total Apuestas</span>
+                    <span class="font-mono-data text-primary-fixed" id="totalApuestas">--</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-on-surface-variant">Monto Total</span>
+                    <span class="font-mono-data text-secondary-container" id="totalMonto">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Pronósticos Accuracy ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-lg mb-xl">
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col items-center justify-center gap-sm animate-in" style="animation-delay:0.32s">
+            <span class="material-symbols-outlined text-primary-fixed text-[40px]">check_circle</span>
+            <span class="font-mono-data text-[28px] font-bold text-primary-fixed" id="statAciertos">--</span>
+            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-bold">Aciertos</span>
+        </div>
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col items-center justify-center gap-sm animate-in" style="animation-delay:0.34s">
+            <span class="material-symbols-outlined text-error text-[40px]">cancel</span>
+            <span class="font-mono-data text-[28px] font-bold text-error" id="statFallos">--</span>
+            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-bold">Fallos</span>
+        </div>
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col items-center justify-center gap-sm animate-in" style="animation-delay:0.36s">
+            <span class="material-symbols-outlined text-secondary-container text-[40px]">pending</span>
+            <span class="font-mono-data text-[28px] font-bold text-secondary-container" id="statPendientes">--</span>
+            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-bold">Pendientes</span>
+        </div>
+        <div class="bg-surface-container border border-white/10 p-lg flex flex-col items-center justify-center gap-sm animate-in" style="animation-delay:0.38s">
+            <span class="material-symbols-outlined text-primary-fixed-dim text-[40px]">percent</span>
+            <span class="font-mono-data text-[28px] font-bold text-primary-fixed-dim" id="statAccuracy">--%</span>
+            <span class="text-xs text-on-surface-variant uppercase tracking-widest font-bold">Accuracy</span>
+        </div>
+    </div>
+
+    <!-- ── Live Transactions Table ── -->
+    <section class="bg-surface-container border border-white/10 animate-in" style="animation-delay:0.4s">
+        <div class="p-lg border-b border-white/10 flex justify-between items-center">
+            <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-primary-fixed">list_alt</span>
+                <h3 class="font-title-md text-title-md text-primary">Últimos Pronósticos</h3>
+            </div>
+            <span class="text-[10px] font-mono-data text-on-surface-variant uppercase tracking-widest" id="txUpdateLabel">Auto-refresh: 10s</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left font-mono-data text-xs">
+                <thead>
+                    <tr class="bg-surface-container-high text-on-surface-variant uppercase tracking-widest border-b border-white/10">
+                        <th class="p-md font-bold">ID</th>
+                        <th class="p-md font-bold">Partido</th>
+                        <th class="p-md font-bold">Jugador</th>
+                        <th class="p-md font-bold">Marcador</th>
+                        <th class="p-md font-bold">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5" id="txBody">
+                    <tr><td colspan="5" class="p-lg text-center text-on-surface-variant">Cargando datos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="p-md border-t border-white/10 flex justify-center">
+            <span class="text-on-surface-variant font-label-caps text-xs" id="txCount">-- registros</span>
+        </div>
+    </section>
+</main>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer class="ml-64 bg-surface-dim border-t border-white/10 px-margin-desktop py-md flex justify-between items-center text-on-tertiary-container font-mono-data text-xs">
+    <div>© 2026 BetCentral · Velocity Admin Engine. <span id="footerStatus">Conectando...</span></div>
+    <div class="flex gap-lg">
+        <span class="text-on-surface-variant">MySQL: <span class="text-primary-fixed" id="footerDb">mundial_db</span></span>
+        <span class="text-on-surface-variant">Última carga: <span class="text-primary-fixed" id="footerTime">--:--:--</span></span>
+    </div>
+</footer>
+
+<!-- ═══════════════════════════ JAVASCRIPT ═══════════════════════════ -->
+<script>
+const API = '/api/stats';
+let lastData = null;
+let refreshInterval = null;
+
+// ── Fetch & Render ──
+async function fetchStats() {
+    const t0 = performance.now();
+    try {
+        const res = await fetch(API);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const latency = Math.round(performance.now() - t0);
+
+        lastData = data;
+
+        // System status
+        document.getElementById('statusLabel').textContent = 'SYSTEM: ONLINE';
+        document.getElementById('statusDot').classList.add('live-dot');
+        document.getElementById('latencyVal').textContent = latency + 'ms';
+        document.getElementById('footerStatus').textContent = 'Todos los sistemas operativos.';
+        document.getElementById('footerTime').textContent = new Date().toLocaleTimeString('es-MX');
+
+        // KPI Cards
+        animateValue('kpiUsuarios', data.usuarios);
+        animateValue('kpiEquipos', data.equipos);
+        animateValue('kpiPartidos', data.partidos);
+        animateValue('kpiPronosticos', data.pronosticos);
+
+        document.getElementById('kpiAciertos').textContent = data.pAciertos + ' aciertos';
+        document.getElementById('kpiFallos').textContent = data.pFallos + ' fallos';
+        document.getElementById('kpiPendientesP').textContent = data.pPendientes + ' pend.';
+
+        // Stats row
+        document.getElementById('statAciertos').textContent = data.pAciertos;
+        document.getElementById('statFallos').textContent = data.pFallos;
+        document.getElementById('statPendientes').textContent = data.pPendientes;
+        const total = data.pAciertos + data.pFallos;
+        const accuracy = total > 0 ? ((data.pAciertos / total) * 100).toFixed(1) : '0.0';
+        document.getElementById('statAccuracy').textContent = accuracy + '%';
+
+        // Apuestas stats
+        document.getElementById('totalApuestas').textContent = data.totalApuestas;
+        document.getElementById('totalMonto').textContent = '$' + Number(data.totalMonto).toLocaleString('en-US', {minimumFractionDigits:2});
+
+        // Chart: Groups
+        renderGroupChart(data.betsByGroup || []);
+
+        // Top Markets
+        renderTopMarkets(data.topMarkets || []);
+
+        // Live Transactions
+        renderTransactions(data.liveTx || []);
+
+        if (data.error) {
+            document.getElementById('footerStatus').textContent = 'Error: ' + data.error;
+        }
+    } catch (err) {
+        document.getElementById('statusLabel').textContent = 'SYSTEM: OFFLINE';
+        document.getElementById('statusDot').classList.remove('live-dot');
+        document.getElementById('statusDot').style.background = '#ffb4ab';
+        document.getElementById('footerStatus').textContent = 'Error de conexión: ' + err.message;
+        console.error('Fetch error:', err);
+    }
+}
+
+function animateValue(id, val) {
+    const el = document.getElementById(id);
+    el.textContent = Number(val).toLocaleString('en-US');
+    el.classList.remove('count-flash');
+    void el.offsetWidth; // reflow
+    el.classList.add('count-flash');
+}
+
+// ── Group Chart ──
+function renderGroupChart(groups) {
+    const barsDiv = document.getElementById('chartBars');
+    const labelsDiv = document.getElementById('chartLabels');
+    if (!groups.length) return;
+
+    const maxVal = Math.max(...groups.map(g => g.value));
+    barsDiv.innerHTML = '';
+    labelsDiv.innerHTML = '';
+
+    groups.forEach((g, i) => {
+        const pct = (g.value / maxVal) * 100;
+        const bar = document.createElement('div');
+        bar.className = 'bg-primary-fixed/20 hover:bg-primary-fixed transition-all duration-200 w-full rounded-t-sm cursor-pointer relative group';
+        bar.style.height = pct + '%';
+        bar.style.animationDelay = (i * 0.03) + 's';
+        // Tooltip
+        bar.innerHTML = `<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-container-highest text-on-surface text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-mono-data">${g.value} partidos</div>`;
+        bar.addEventListener('mouseenter', () => { bar.style.filter = 'drop-shadow(0 0 8px #c3f400)'; });
+        bar.addEventListener('mouseleave', () => { bar.style.filter = 'none'; });
+        barsDiv.appendChild(bar);
+
+        const lbl = document.createElement('span');
+        lbl.textContent = g.label.replace('Grupo ', '');
+        labelsDiv.appendChild(lbl);
+    });
+}
+
+// ── Top Markets ──
+function renderTopMarkets(markets) {
+    const list = document.getElementById('topMarketsList');
+    if (!markets.length) {
+        list.innerHTML = '<div class="text-center text-on-surface-variant text-xs p-md">Sin datos de mercados</div>';
+        return;
+    }
+    const maxCuota = Math.max(...markets.map(m => m.value));
+    list.innerHTML = markets.map((m, i) => `
+        <div class="bg-surface-container-high p-md rounded flex items-center justify-between border border-white/5 hover:border-primary-fixed/30 transition-colors">
+            <div class="flex items-center gap-md">
+                <div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-surface-variant text-sm">sports_soccer</span>
+                </div>
+                <div>
+                    <div class="font-label-caps text-[11px] leading-tight">${m.label}</div>
+                    <div class="text-[10px] text-on-surface-variant font-mono-data">Cuotas: ${m.value.toFixed(2)}</div>
+                </div>
+            </div>
+            <div class="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                <div class="bg-primary-fixed h-full rounded-full" style="width: ${(m.value/maxCuota*100).toFixed(0)}%"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ── Transactions Table ──
+function renderTransactions(txList) {
+    const tbody = document.getElementById('txBody');
+    if (!txList.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-lg text-center text-on-surface-variant">No hay pronósticos registrados aún.</td></tr>';
+        document.getElementById('txCount').textContent = '0 registros';
+        return;
+    }
+
+    tbody.innerHTML = txList.map(tx => {
+        let statusClass, statusText;
+        switch (tx.status) {
+            case 'SETTLED':
+                statusClass = 'bg-primary-fixed/10 text-primary-fixed';
+                statusText = 'ACERTÓ';
+                break;
+            case 'LOSS':
+                statusClass = 'bg-error/10 text-error';
+                statusText = 'FALLÓ';
+                break;
+            default:
+                statusClass = 'bg-secondary-container/10 text-secondary-container';
+                statusText = 'PENDIENTE';
+        }
+        return `
+        <tr class="hover:bg-surface-container-highest transition-colors">
+            <td class="p-md text-on-surface-variant">${tx.id}</td>
+            <td class="p-md">
+                <div class="flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-primary-fixed text-sm">sports_soccer</span>
+                    <span>${tx.mercado}</span>
+                </div>
+            </td>
+            <td class="p-md">${tx.usuario}</td>
+            <td class="p-md font-bold">${tx.marcador}</td>
+            <td class="p-md">
+                <span class="px-sm py-xs ${statusClass} rounded text-[10px] font-bold">${statusText}</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('txCount').textContent = txList.length + ' registros';
+}
+
+// ── Export ──
+function exportData() {
+    if (!lastData) { alert('No hay datos para exportar. Espera a que se carguen.'); return; }
+    const blob = new Blob([JSON.stringify(lastData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'velocity_admin_export_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Row pulse animation ──
+function startRowPulse() {
+    setInterval(() => {
+        const rows = document.querySelectorAll('#txBody tr');
+        if (!rows.length) return;
+        const idx = Math.floor(Math.random() * rows.length);
+        rows[idx].classList.add('bg-white/5');
+        setTimeout(() => rows[idx].classList.remove('bg-white/5'), 500);
+    }, 3000);
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', () => {
+    fetchStats();
+    refreshInterval = setInterval(fetchStats, 10000); // Auto-refresh each 10s
+    startRowPulse();
+});
+</script>
+</body>
+</html>

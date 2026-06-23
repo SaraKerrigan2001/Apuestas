@@ -11,55 +11,18 @@ import java.util.*;
  */
 public class ApuestaDAOImpl implements ApuestaDAO {
 
-    private final String url;
-    private final String user;
-    private final String pass;
-
     // ---------------------------------------------------------------
-    // Constructor: lee credenciales desde config.properties
+    // Constructor
     // ---------------------------------------------------------------
     public ApuestaDAOImpl() {
-        Properties props = new Properties();
-
-        // Obtener ruta del .class para buscar config.properties relativo a él
-        String binPath = "";
-        try {
-            binPath = new File(
-                ApuestaDAOImpl.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()
-            ).getAbsolutePath();
-        } catch (Exception ignored) {}
-
-        List<File> candidatos = new ArrayList<>();
-        if (!binPath.isEmpty()) {
-            File binDir = new File(binPath);
-            candidatos.add(new File(binDir, "config.properties"));
-            candidatos.add(new File(binDir.getParent(), "config.properties"));
-        }
-        candidatos.add(new File("config.properties"));
-        candidatos.add(new File("C:/java/PronosticosMundial/config.properties"));
-
-        for (File f : candidatos) {
-            if (f.exists()) {
-                try (FileInputStream fis = new FileInputStream(f)) {
-                    props.load(fis);
-                    break;
-                } catch (IOException ignored) {}
-            }
-        }
-
-        this.url  = props.getProperty("db.url",
-            "jdbc:mysql://localhost:3306/mundial_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true");
-        this.user = props.getProperty("db.user", "root");
-        this.pass = props.getProperty("db.pass", "");
     }
 
-    public String getUrl()  { return url;  }
-    public String getUser() { return user; }
-    public String getPass() { return pass; }
+    public String getUrl()  { return ConexionDB.getInstancia().getUrl();  }
+    public String getUser() { return ConexionDB.getInstancia().getUser(); }
+    public String getPass() { return ConexionDB.getInstancia().getPass(); }
 
     private Connection getConexion() throws SQLException {
-        return DriverManager.getConnection(url, user, pass);
+        return ConexionDB.getInstancia().getConexion();
     }
 
     // ---------------------------------------------------------------
@@ -106,6 +69,57 @@ public class ApuestaDAOImpl implements ApuestaDAO {
             System.err.println("[ApuestaDAO] Error al registrar: " + e.getMessage());
             return false;
         }
+    }
+
+    // ---------------------------------------------------------------
+    // UPDATE
+    // ---------------------------------------------------------------
+    @Override
+    public boolean actualizarApuesta(ApuestaModel a) {
+        String sql = "UPDATE pronosticos "
+                   + "SET equipo_local = ?, equipo_visitante = ?, goles_local = ?, goles_visitante = ? "
+                   + "WHERE id = ? AND nombre_jugador = ?";
+        try (Connection conn = getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, a.getEquipoLocal());
+            ps.setString(2, a.getEquipoVisitante());
+            ps.setInt(3, a.getGolesLocal());
+            ps.setInt(4, a.getGolesVisitante());
+            ps.setInt(5, a.getId());
+            ps.setString(6, a.getNombreApostador());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("[ApuestaDAO] Error al actualizar: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // ---------------------------------------------------------------
+    // OBTENER FECHA PARTIDO
+    // ---------------------------------------------------------------
+    @Override
+    public java.time.LocalDateTime getFechaHoraPartido(String equipoLocal, String equipoVisitante) {
+        String sql = "SELECT fecha_hora FROM partidos WHERE equipo_local = ? AND equipo_visitante = ?";
+        try (Connection conn = getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, equipoLocal);
+            ps.setString(2, equipoVisitante);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp ts = rs.getTimestamp("fecha_hora");
+                    if (ts != null) {
+                        return ts.toLocalDateTime();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[ApuestaDAO] Error al obtener fecha de partido: " + e.getMessage());
+        }
+        return null;
     }
 
     // ---------------------------------------------------------------

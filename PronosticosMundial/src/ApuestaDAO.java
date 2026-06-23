@@ -15,6 +15,13 @@ public interface ApuestaDAO {
     boolean registrarApuesta(ApuestaModel apuesta);
 
     /**
+     * Actualiza una apuesta existente en la base de datos.
+     * @param apuesta objeto con los datos modificados
+     * @return true si se actualizó con éxito, false si hubo error
+     */
+    boolean actualizarApuesta(ApuestaModel apuesta);
+
+    /**
      * Devuelve todas las apuestas registradas, ordenadas por fecha descendente.
      */
     List<ApuestaModel> listarApuestas();
@@ -35,4 +42,12 @@ public interface ApuestaDAO {
      * Devuelve el total de apuestas registradas.
      */
     int contarApuestas();
+
+    /**
+     * Devuelve la fecha y hora programada del partido.
+     * @param equipoLocal nombre del equipo local
+     * @param equipoVisitante nombre del equipo visitante
+     * @return LocalDateTime o null si no existe
+     */
+    java.time.LocalDateTime getFechaHoraPartido(String equipoLocal, String equipoVisitante);
 }

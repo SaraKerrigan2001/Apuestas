@@ -5,18 +5,7 @@
 CREATE DATABASE IF NOT EXISTS mundial_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE mundial_db;
 
--- ============================================================
--- TABLA 0: Usuarios (Auth)
--- ============================================================
-CREATE TABLE IF NOT EXISTS usuarios (
-    id       INT AUTO_INCREMENT PRIMARY KEY,
-    email    VARCHAR(100) UNIQUE NOT NULL,
-    usuario  VARCHAR(50) UNIQUE NOT NULL,
-    clave    VARCHAR(255) NOT NULL,
-    saldo    DECIMAL(10,2) DEFAULT 100.00,
-    activo   TINYINT(1) DEFAULT 1,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+
 
 -- ============================================================
 -- TABLA 1: Equipos
@@ -40,7 +29,8 @@ CREATE TABLE IF NOT EXISTS partidos (
     cuota_visitante  DECIMAL(5,2) NOT NULL DEFAULT 2.50,
     goles_local      INT          DEFAULT NULL,
     goles_visitante  INT          DEFAULT NULL,
-    jugado           TINYINT(1)   DEFAULT 0
+    jugado           TINYINT(1)   DEFAULT 0,
+    fecha_hora       DATETIME     DEFAULT NULL
 );
 
 -- ============================================================
@@ -120,7 +110,7 @@ INSERT INTO equipos (nombre, grupo) VALUES
 ('España','Grupo H'),('Cabo Verde','Grupo H'),('Arabia Saudita','Grupo H'),('Uruguay','Grupo H'),
 ('Francia','Grupo I'),('Senegal','Grupo I'),('Irak','Grupo I'),('Noruega','Grupo I'),
 ('Argentina','Grupo J'),('Argelia','Grupo J'),('Austria','Grupo J'),('Jordania','Grupo J'),
-('Portugal','Grupo K'),('Rep. Democrática del Congo','Grupo K'),('Uzbekistán','Grupo K'),('Colombia','Grupo K'),
+('Colombia','Grupo K'),('Rep. Democrática del Congo','Grupo K'),('Portugal','Grupo K'),('Uzbekistán','Grupo K'),
 ('Inglaterra','Grupo L'),('Croacia','Grupo L'),('Ghana','Grupo L'),('Panamá','Grupo L');
 
 -- ============================================================
@@ -131,20 +121,20 @@ INSERT INTO equipos (nombre, grupo) VALUES
 -- GRUPO A
 INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empate,cuota_visitante) VALUES
 ('Grupo A','México','Sudáfrica',1.80,3.40,4.50),
-('Grupo A','Corea del Sur','Chequia',2.10,3.20,3.60),
+('Grupo A','Corea del Sur','República Checa',2.10,3.20,3.60),
 ('Grupo A','México','Corea del Sur',1.90,3.30,4.00),
-('Grupo A','Sudáfrica','Chequia',2.50,3.10,2.90),
-('Grupo A','México','Chequia',1.60,3.80,5.50),
+('Grupo A','Sudáfrica','República Checa',2.50,3.10,2.90),
+('Grupo A','México','República Checa',1.60,3.80,5.50),
 ('Grupo A','Corea del Sur','Sudáfrica',1.85,3.20,4.20);
 
 -- GRUPO B
 INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empate,cuota_visitante) VALUES
 ('Grupo B','Canadá','Bosnia y Herzegovina',2.20,3.20,3.30),
-('Grupo B','Qatar','Suiza',3.80,3.30,1.90),
-('Grupo B','Canadá','Qatar',1.70,3.50,4.80),
+('Grupo B','Catar','Suiza',3.80,3.30,1.90),
+('Grupo B','Canadá','Catar',1.70,3.50,4.80),
 ('Grupo B','Bosnia y Herzegovina','Suiza',2.80,3.20,2.50),
 ('Grupo B','Canadá','Suiza',2.10,3.30,3.40),
-('Grupo B','Bosnia y Herzegovina','Qatar',1.90,3.20,4.00);
+('Grupo B','Bosnia y Herzegovina','Catar',1.90,3.20,4.00);
 
 -- GRUPO C
 INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empate,cuota_visitante) VALUES
@@ -220,12 +210,12 @@ INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empa
 
 -- GRUPO K
 INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empate,cuota_visitante) VALUES
-('Grupo K','Portugal','Rep. Democrática del Congo',1.30,5.20,9.00),
-('Grupo K','Uzbekistán','Colombia',2.80,3.10,2.50),
-('Grupo K','Portugal','Uzbekistán',1.25,5.50,10.00),
-('Grupo K','Rep. Democrática del Congo','Colombia',2.40,3.20,2.90),
-('Grupo K','Portugal','Colombia',1.60,3.70,5.50),
-('Grupo K','Rep. Democrática del Congo','Uzbekistán',2.00,3.20,3.80);
+('Grupo K','Colombia','RD Congo',1.60,3.60,5.50),
+('Grupo K','Portugal','Uzbekistán',1.25,5.50,11.00),
+('Grupo K','Colombia','Portugal',3.20,3.20,2.10),
+('Grupo K','RD Congo','Uzbekistán',2.40,3.10,2.90),
+('Grupo K','Colombia','Uzbekistán',1.40,4.50,7.50),
+('Grupo K','RD Congo','Portugal',6.50,4.20,1.45);
 
 -- GRUPO L
 INSERT INTO partidos (grupo,equipo_local,equipo_visitante,cuota_local,cuota_empate,cuota_visitante) VALUES
@@ -247,8 +237,25 @@ CREATE TABLE IF NOT EXISTS usuarios (
     usuario          VARCHAR(50)  NULL DEFAULT NULL UNIQUE,
     clave            VARCHAR(255) NULL DEFAULT NULL,
     saldo            DECIMAL(10,2) DEFAULT 100.00,
+    es_admin         TINYINT(1)   DEFAULT 0,
     activo           TINYINT(1)   DEFAULT 1,
     fecha_registro   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+
+-- ============================================================
+-- USUARIOS DE PRUEBA (Admin + Apostador)
+-- Las contraseñas se guardan hasheadas; no se insertan en texto plano.
+-- Ejecuta una vez desde la carpeta del proyecto:
+--
+--   javac -encoding UTF-8 -cp "lib\mysql-connector-j-8.3.0.jar" -d bin src\*.java
+--   java -cp "bin;lib\mysql-connector-j-8.3.0.jar" SeedUsuarios
+--
+-- Credenciales creadas:
+--   ADMIN     → admin@mundial.com    / admin123    (pestaña Admin)
+--   APOSTADOR → jugador@mundial.com  / jugador123  (pestaña Login)
+--
+-- Admin de respaldo (en código, sin BD):
+--   admin@betcentral.com / admin
+-- ============================================================
